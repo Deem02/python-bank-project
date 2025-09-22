@@ -5,7 +5,7 @@
 # cashiers can type in an id or this can be automatically generated
 
 import uuid
-class Customer():
+class Customer:
     def __init__(self, first_name, last_name, password):
         self.customer_id = uuid.uuid4()
         self.first_name = first_name
