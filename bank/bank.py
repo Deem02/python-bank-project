@@ -24,7 +24,7 @@ class Customer:
         # self.balance_savings = balance_savings     
    
 class BankAccount(): 
-    account_number_counter= 1000
+    account_number_counter= 1001
     def __init__(self, customer, balance=0):
         self.account_number = BankAccount.account_number_counter
         BankAccount.account_number_counter +=1
@@ -34,16 +34,20 @@ class BankAccount():
     def deposit(self, amount):
         if amount > 0:
             self.balance += amount 
-            print(f"Deposited {amount}. New balance: {self.balance}")
+            #print(f"Deposited {amount}. New balance: {self.balance}")
+            return True
         else:
-            print("Deposit amount must be positive")
+            #print("Deposit amount must be positive")
+            return False
         
     def withdraw(self, amount):
         if 0 < amount <= self.balance:
             self.balance -= amount
-            print(f"Withdrew {amount}. New balance: {self.balance}")
+            #print(f"Withdrew {amount}. New balance: {self.balance}")
+            return True
         else:
-            print("Insufficient funds or invalid amount")
+            # print("Insufficient funds or invalid amount")
+            return False
     def __str__(self):
         return f"Account #{self.account_number} Balance {self.balance}"
        
