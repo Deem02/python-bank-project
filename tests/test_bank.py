@@ -1,6 +1,6 @@
 import unittest
 import uuid
-from bank.bank import Customer, BankAccount, CheckingAccount, SavingsAccount
+from bank.bank import Customer, BankAccount, CheckingAccount, SavingsAccount, Bank
 
 class TestCustomer(unittest.TestCase):
     def test_create_customer_object(self):
@@ -54,4 +54,5 @@ class TestBankAccountAndSubclass(unittest.TestCase):
         self.savings.withdraw(0)
         self.assertEqual(self.savings.balance,0)
         
-            
+class TestBank(unittest.TestCas):
+    pass

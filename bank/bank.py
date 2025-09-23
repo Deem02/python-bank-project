@@ -5,110 +5,154 @@
 # cashiers can type in an id or this can be automatically generated
 
 import uuid
+import csv
 class Customer:
-    def __init__(self, first_name, last_name, password):
-        self.customer_id = uuid.uuid4()
+    def __init__(self, account_id, first_name, last_name, password):
+        #self.customer_id = uuid.uuid4()
+        self.account_id = int(account_id)
         self.first_name = first_name
         self.last_name = last_name
         self.password= password
-        self.accounts = []
+        #self.accounts = []
+        self.checking_account =None
+        self.savings_account =None
       
-    def  add_account(self, account):
-        self.accounts.append(account) 
+    # def  add_account(self, account):
+    #     self.accounts.append(account) 
         
     def __str__(self):
-        return f"Customer: {self.first_name} {self.last_name}, Customer ID: {self.customer_id}"
+        return f"Customer: {self.first_name} {self.last_name}, Account ID: {self.account_id}"
     
     
  # self.balance_checking =balance_checking
         # self.balance_savings = balance_savings     
    
 class BankAccount(): 
-    account_number_counter= 1001
-    def __init__(self, customer, balance=0):
-        self.account_number = BankAccount.account_number_counter
-        BankAccount.account_number_counter +=1
-        self.balance = balance
+    
+    def __init__(self, customer, balance=0.0):
         self.customer = customer
+        self.balance = float(balance)
         
     def deposit(self, amount):
         if amount > 0:
             self.balance += amount 
-            #print(f"Deposited {amount}. New balance: {self.balance}")
+            print(f"Deposited {amount}. New balance: {self.balance}")
             return True
         else:
-            #print("Deposit amount must be positive")
+            print("Deposit amount must be positive")
             return False
         
     def withdraw(self, amount):
         if 0 < amount <= self.balance:
             self.balance -= amount
-            #print(f"Withdrew {amount}. New balance: {self.balance}")
+            print(f"Withdrew {amount}. New balance: {self.balance}")
             return True
         else:
-            # print("Insufficient funds or invalid amount")
+            print("Insufficient funds or invalid amount")
             return False
     def __str__(self):
-        return f"Account #{self.account_number} Balance {self.balance}"
+        return f"Account ID: {self.customer.account_id} Balance {self.balance}"
        
 #  https://codebricks.co.nz/python-oop-example-01 
 
-class CheckingAccount(BankAccount):
-    def __init__(self, customer, balance = 0):
-        super().__init__(customer,balance)
-        
+class CheckingAccount(BankAccount):     
     def __str__(self):
-        return f"Checking Account #{self.account_number} Balance {self.balance}"
+        return f"Checking Account ID: {self.customer.account_id} Balance {self.balance}"
         
-class SavingsAccount(BankAccount):
-    def __init__(self, customer, balance = 0):
-        super().__init__(customer,balance)
-        
+class SavingsAccount(BankAccount):        
     def __str__(self):
-        return f"Saving Account #{self.account_number} Balance {self.balance}"
+        return f"Saving Account ID: {self.customer.account_id} Balance {self.balance}"
   
 class Bank:
-    def __init__(self):
+    def __init__(self, filename='data/bank.csv'):
+        self.filename = filename
         self.customers = {}
+        self.load_customers()
+       
+    def load_customers(self):
+        try:
+            with open(self.filename, 'r', newline='') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    account_id= int(row['account_id'])
+                    customer = Customer(
+                        account_id=account_id,   
+                        first_name= row['frst_name'],
+                        last_name= row['last_name'],
+                        password= row['password']                        
+                        )
+                    customer.checking_account = CheckingAccount(customer, float(row['balance_checking']) )
+                    customer.savings_account = SavingsAccount(customer, float(row['balance_savings']))
+                    self.customers[account_id] = customer
+        except Exception as e:
+              print(f"An error occuured while loading the file: {e}")
+                
+    def save_customers(self):
+        try:
+           fieldnames = ['account_id','frst_name','last_name','password','balance_checking','balance_savings'] 
+           with open(self.filename, 'w', newline='') as file:
+               writer = csv.DictWriter(file, fieldnames=fieldnames) 
+               writer.writeheader()
+               for customer in self.customers.values():
+                writer.writerow({
+                    'account_id': customer.account_id,
+                    'frst_name': customer.first_name,
+                    'last_name': customer.last_name, 
+                    'password': customer.password,
+                    'balance_checking': customer.checking_account.balance if customer.checking_account else 0,
+                    'balance_savings': customer.savings_account.balance if customer.savings_account else 0
+                })
+        except IOError as e:
+            print(f'Error: could not save data. {e}')
+          #https://realpython.com/python-csv/ 
+          
+    def get_account_id(self):
+        if not self.customers:
+            return 1001
+        return max(self.customers.keys()) +1
         
-    def add_customer(self, first_name, last_name, password, checking_balance=None, savings_balance=None):
-        new_customer = Customer(first_name, last_name, password)
-        self.customers[new_customer.customer_id] = new_customer
-        print(f"Customer '{first_name} {last_name}' add successfully ")
+    def add_customer(self, first_name, last_name, password, checking_balance=0, savings_balance=0):
+        account_id = self.get_account_id()
+        new_customer = Customer(account_id,first_name, last_name, password)
+        new_customer.checking_account = CheckingAccount(new_customer,checking_balance)
+        new_customer.savings_account = SavingsAccount(new_customer, savings_balance)
+        self.customers[account_id] = new_customer
+        print(f"Customer '{first_name} {last_name}' Account ID: {account_id} added successfully ")
         
-        if checking_balance is not None:
-            checking_account = CheckingAccount(customer=new_customer, balance=checking_balance)
-            new_customer.add_account(checking_account)
-            print("Checking Account created")
-            
-        if savings_balance is not None:
-            savings_account = SavingsAccount(customer=new_customer, balance=savings_balance)
-            new_customer.add_account(savings_account)
-            print("Savings Account created")
+        self.save_customers()
         return new_customer
-    
-    def get_initial_balance(self, account_type):
-        wants_account_input = input(f"Want to open a {account_type} account? (yes/no) ").lower() 
-        if wants_account_input in ['yes','y']:
-            try:
-               balance = float(input(f"Enter initial {account_type} balance:")) 
-               return balance if balance >= 0 else 0.0
-            except ValueError:
-                print(f"Invalid amount. Creating {account_type} account with 0 balance ")
-                return 0.0
-        return None
-
+  
         
     def handle_add_new_customer(self):
-        first_name = input("First Name: ")
-        last_name = input("Last Name: ")
-        password = input("Password: ")
-        # wants_cheking = input("Want to open a cheking account? (yes/no)").lower() in ['yes']
-        # wants_saving = input("Want to open a saving account? (yes/no)").lower() in ['yes']
-        checking_balance = self.get_initial_balance('cheking')
-        savings_balance = self.get_initial_balance('savings')
+        while True:
+            first_name = input("First Name: ").strip()
+            if first_name:
+                break
+            print('First name cannnot be empty. Please try agein ')
+        while True:
+            last_name = input("Last Name: ").strip()
+            if last_name:
+                break
+            print('Last name cannnot be empty. Please try agein ')
+        while True:
+            password = input("Password: ").strip()
+            if password:
+                break
+            print('Password cannnot be empty. Please try agein ')
+        try:
+            checking_balance = float(input('Enter initiial cheking balance: ') or '0.0') # if its empty string
+            savings_balance = float(input('Enter initiial savings balance: ') or '0.0')
+            if checking_balance < 0 or savings_balance < 0:
+               print('Balance cannot be nefative. Setting it to 0.') 
+               checking_balance = max(0, checking_balance)
+               savings_balance = max(0, savings_balance)
+        except ValueError:
+           print("Invalid amount. Creating account with 0 balance")
+           checking_balance = 0.0
+           savings_balance = 0.0
+           
         customer = self.add_customer(first_name, last_name, password, checking_balance, savings_balance)
-        print(customer)
+        #print(customer)
     
 if __name__ == '__main__' : 
     # customer1 = Customer('deem','alqasir', '123')
@@ -120,4 +164,15 @@ if __name__ == '__main__' :
     # customer1 = Customer(first_name, last_name, password)
     # print(customer1)
     bank = Bank()
-    bank.handle_add_new_customer()
+    while True:
+        print('1) Add New Customer')
+        print('2) Exit')
+        choice = input('Choose an option: ').strip()
+        
+        if choice == '1':   
+            bank.handle_add_new_customer()
+        elif choice == '2':
+            print('Exiting from application')
+            break
+        else:
+            print('Invalid option. Please try agin.')
