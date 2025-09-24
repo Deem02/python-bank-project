@@ -132,18 +132,24 @@ class Bank:
     def logout(self):
         self.current_customer = None        
       
-    # def handle_deposit(self):
-    #     print("1) Checking Account")
-    #     print("2) Savings Account")
-    #     choice = input("Choose an account to deposit: ")
-    #     account_to_deposit = None
-    #     if choice == '1':
-    #         account_to_deposit = self.current_customer.checking_account
-    #     elif choice == '2':
-    #         account_to_deposit = self.current_customer.sanings_account
-    #     else:
-    #         print('Invalid choise')
-    #         return
+    def handle_deposit(self):
+        print("1) Checking Account")
+        print("2) Savings Account")
+        choice = input("Choose an account to deposit: ")
+        
+        try:
+            amount = float(input("Enter the amount:"))
+            if choice == '1':
+                if self.current_customer.checking_account.deposit(amount):
+                    self.save_customers()
+            elif choice == '2':
+                if self.current_customer.savings_account.deposit(amount):
+                    self.save_customers()
+            else:
+                print('Invalid choise')
+                
+        except ValueError:
+            print('Invalid amount. Enter a number')
         
         
                   
@@ -177,7 +183,24 @@ class Bank:
            
         self.add_customer(first_name, last_name, password, checking_balance, savings_balance)
         #print(customer)
-    
+    def show_customer_menu(self):
+        customer= self.current_customer
+        print(customer.checking_account)
+        print(customer.savings_account)
+        print('1) Deposit')
+        print('2) Withdraw')
+        print('3) Transfer')
+        print('4) Logout')
+        choice = input('Choose an option:').strip()
+        
+        if choice == '1':
+            self.handle_deposit()
+        elif choice == '4':
+            self.logout()
+        else:
+            print('Invalid option')
+            
+            
 if __name__ == '__main__' : 
     # customer1 = Customer('deem','alqasir', '123')
     # print(customer1)
@@ -189,17 +212,21 @@ if __name__ == '__main__' :
     # print(customer1)
     bank = Bank()
     while True:
-        print('1) Add New Customer')
-        print('2) Login')
-        print('3) Exit')
-        choice = input('Choose an option: ').strip()
         
-        if choice == '1':   
-            bank.handle_add_new_customer()
-        if choice == '2':
-            bank.login()
-        elif choice == '3':
-            print('Exiting from application')
-            break
+        if bank.current_customer:
+            bank.show_customer_menu()
         else:
-            print('Invalid option. Please try agin.')
+            print('1) Add New Customer')
+            print('2) Login')
+            print('3) Exit')
+            choice = input('Choose an option: ').strip()
+            
+            if choice == '1':   
+                bank.handle_add_new_customer()
+            if choice == '2':
+                bank.login()
+            elif choice == '3':
+                print('Exiting from application')
+                break
+            else:
+                print('Invalid option. Please try agin.')
