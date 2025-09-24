@@ -137,21 +137,36 @@ class Bank:
         print("2) Savings Account")
         choice = input("Choose an account to deposit: ")
         
-        try:
-            amount = float(input("Enter the amount:"))
-            if choice == '1':
-                if self.current_customer.checking_account.deposit(amount):
-                    self.save_customers()
-            elif choice == '2':
-                if self.current_customer.savings_account.deposit(amount):
-                    self.save_customers()
-            else:
-                print('Invalid choise')
-                
-        except ValueError:
-            print('Invalid amount. Enter a number')
-        
-        
+        if choice == '1' or choice == '2' : 
+            try:
+                amount = float(input("Enter the amount:"))
+                if choice == '1':
+                    if self.current_customer.checking_account.deposit(amount):
+                        self.save_customers()
+                elif choice == '2':
+                    if self.current_customer.savings_account.deposit(amount):
+                        self.save_customers()             
+            except ValueError:
+                print('Invalid amount. Enter a number')
+        else:
+          print('Invalid choise')
+    def handle_withdraw(self):
+        print("1) Checking Account")
+        print("2) Savings Account")
+        choice = input("Choose an account to withdraw: ")
+        if choice == '1' or choice == '2' :
+            try:
+                amount = float(input("Enter the amount:"))
+                if choice == '1':
+                    if self.current_customer.checking_account.withdraw(amount):
+                        self.save_customers()
+                elif choice == '2':
+                    if self.current_customer.savings_account.withdraw(amount):
+                        self.save_customers()            
+            except ValueError:
+                print('Invalid amount. Enter a number')
+        else:
+         print('Invalid choise')  
                   
     def handle_add_new_customer(self):
         while True:
@@ -195,6 +210,8 @@ class Bank:
         
         if choice == '1':
             self.handle_deposit()
+        elif choice == '2':
+            self.handle_withdraw()
         elif choice == '4':
             self.logout()
         else:
@@ -223,6 +240,7 @@ if __name__ == '__main__' :
             
             if choice == '1':   
                 bank.handle_add_new_customer()
+                continue
             if choice == '2':
                 bank.login()
             elif choice == '3':
