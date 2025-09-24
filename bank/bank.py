@@ -1,10 +1,4 @@
-# Add New Customer
-# customer can have a checking account
-# customer can have a savings account
-# customer can have both a checking and a savings account
-# cashiers can type in an id or this can be automatically generated
-
-import uuid
+#import uuid
 import csv
 class Customer:
     def __init__(self, account_id, first_name, last_name, password):
@@ -67,6 +61,7 @@ class Bank:
     def __init__(self, filename='data/bank.csv'):
         self.filename = filename
         self.customers = {}
+        self.current_customer = None # to track logged in
         self.load_customers()
        
     def load_customers(self):
@@ -122,7 +117,36 @@ class Bank:
         self.save_customers()
         return new_customer
   
+    def login(self): 
+        try:
+            account_id = int(input("Enter your account ID: "))  
+            password = input("Enter your password: ") 
+            customer = self.customers.get(account_id)
+            if customer and customer.password == password:
+                self.current_customer = customer
+                print(f"Welcome {customer.first_name} {customer.last_name}!")
+            else: 
+                print('Invalid account ID or password') 
+        except ValueError:
+            print('Invalid account ID format. Enter a number') 
+    def logout(self):
+        self.current_customer = None        
+      
+    # def handle_deposit(self):
+    #     print("1) Checking Account")
+    #     print("2) Savings Account")
+    #     choice = input("Choose an account to deposit: ")
+    #     account_to_deposit = None
+    #     if choice == '1':
+    #         account_to_deposit = self.current_customer.checking_account
+    #     elif choice == '2':
+    #         account_to_deposit = self.current_customer.sanings_account
+    #     else:
+    #         print('Invalid choise')
+    #         return
         
+        
+                  
     def handle_add_new_customer(self):
         while True:
             first_name = input("First Name: ").strip()
@@ -151,7 +175,7 @@ class Bank:
            checking_balance = 0.0
            savings_balance = 0.0
            
-        customer = self.add_customer(first_name, last_name, password, checking_balance, savings_balance)
+        self.add_customer(first_name, last_name, password, checking_balance, savings_balance)
         #print(customer)
     
 if __name__ == '__main__' : 
@@ -166,12 +190,15 @@ if __name__ == '__main__' :
     bank = Bank()
     while True:
         print('1) Add New Customer')
-        print('2) Exit')
+        print('2) Login')
+        print('3) Exit')
         choice = input('Choose an option: ').strip()
         
         if choice == '1':   
             bank.handle_add_new_customer()
-        elif choice == '2':
+        if choice == '2':
+            bank.login()
+        elif choice == '3':
             print('Exiting from application')
             break
         else:
