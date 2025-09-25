@@ -2,24 +2,17 @@
 import csv
 class Customer:
     def __init__(self, account_id, first_name, last_name, password):
-        #self.customer_id = uuid.uuid4()
         self.account_id = int(account_id)
         self.first_name = first_name
         self.last_name = last_name
         self.password= password
-        #self.accounts = []
         self.checking_account =None
         self.savings_account =None
-      
-    # def  add_account(self, account):
-    #     self.accounts.append(account) 
+    
         
     def __str__(self):
         return f"Customer: {self.first_name} {self.last_name}, Account ID: {self.account_id}"
-    
-    
- # self.balance_checking =balance_checking
-        # self.balance_savings = balance_savings     
+        
    
 class BankAccount(): 
     
@@ -49,7 +42,49 @@ class BankAccount():
        
 #  https://codebricks.co.nz/python-oop-example-01 
 
-class CheckingAccount(BankAccount):     
+class CheckingAccount(BankAccount): 
+    OVERDRAFT_FEE = 35.0
+    OVERDRAFT_LIMIT = -100.0
+    MAX_OVERDRAFTS = 2
+    
+    def __init__(self, customer, balance=0.0, overdraft_count=0, is_active= True):
+        super().__init__(customer, balance)
+        self.overdraft_count = int(overdraft_count)
+        self.is_active = str(is_active).lower() == 'true'
+    
+        
+    def withdraw(self, amount):
+        if not self.is_active:
+            print('Account is deactivated ')
+            return False
+        if self.balance>=amount:
+            self.balance-=amount
+            return True
+        else: # an overdraft situation
+            total_charge = amount +self.OVERDRAFT_FEE
+            if (self.balance - total_charge) < self.OVERDRAFT_LIMIT:
+                print(f'Transaction denied. Exceeds overdraft limit of ${self.OVERDRAFT_LIMIT} ')
+                return False
+            # overdraft allowed 
+            self.balance -= total_charge
+            self.overdraft_count += 1
+            print(f'Overdraft fee of ${self.OVERDRAFT_FEE} has been applied')
+            
+            if self.overdraft_count >= self.MAX_OVERDRAFTS:
+                self.is_active = False
+                print('Waring: Account has been deactivated')
+            return True
+        
+    def deposit(self, amount):  
+        deposit_successful = super().deposit(amount)          
+         
+        if deposit_successful:
+            # reactivate if  the customer balance become  >=0 
+            if not self.is_active and self.balance >=0:
+              self.is_active = True
+              self.overdraft_count = 0
+              print('Account is reactivated.') 
+              
     def __str__(self):
         return f"Checking Account ID: {self.customer.account_id} Balance {self.balance}"
         
@@ -62,13 +97,17 @@ class Bank:
         self.filename = filename
         self.customers = {}
         self.current_customer = None # to track logged in
+        self.CSV_HEADERS = [
+            'account_id','frst_name','last_name','password','balance_checking',
+            'balance_savings','checking_overdrafts','checking_is_active'
+        ]
         self.load_customers()
        
     def load_customers(self):
         try:
             with open(self.filename, 'r', newline='') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
+                rows = list(csv.DictReader(file))
+                for row in rows:
                     account_id= int(row['account_id'])
                     customer = Customer(
                         account_id=account_id,   
@@ -76,7 +115,10 @@ class Bank:
                         last_name= row['last_name'],
                         password= row['password']                        
                         )
-                    customer.checking_account = CheckingAccount(customer, float(row['balance_checking']) )
+                    customer.checking_account = CheckingAccount(customer, 
+                                                                float(row.get('balance_checking') or 0.0),
+                                                                int(row.get('checking_overdrafts') or 0), 
+                                                                row.get('checking_is_active') or 'True' )
                     customer.savings_account = SavingsAccount(customer, float(row['balance_savings']))
                     self.customers[account_id] = customer
         except Exception as e:
@@ -84,9 +126,8 @@ class Bank:
                 
     def save_customers(self):
         try:
-           fieldnames = ['account_id','frst_name','last_name','password','balance_checking','balance_savings'] 
            with open(self.filename, 'w', newline='') as file:
-               writer = csv.DictWriter(file, fieldnames=fieldnames) 
+               writer = csv.DictWriter(file, fieldnames=self.CSV_HEADERS) 
                writer.writeheader()
                for customer in self.customers.values():
                 writer.writerow({
@@ -95,7 +136,9 @@ class Bank:
                     'last_name': customer.last_name, 
                     'password': customer.password,
                     'balance_checking': customer.checking_account.balance if customer.checking_account else 0,
-                    'balance_savings': customer.savings_account.balance if customer.savings_account else 0
+                    'balance_savings': customer.savings_account.balance if customer.savings_account else 0,
+                    'checking_overdrafts': customer.checking_account.overdraft_count,
+                    'checking_is_active': customer.checking_account.is_active,
                 })
         except IOError as e:
             print(f'Error: could not save data. {e}')
@@ -146,7 +189,7 @@ class Bank:
                         self.save_customers()
                 elif choice == '2':
                     if self.current_customer.savings_account.deposit(amount):
-                        print(f'Deposited {amount} New balance: {self.current_customer.sanings_account.balance}')
+                        print(f'Deposited {amount} New balance: {self.current_customer.savings_account.balance}')
                         self.save_customers()             
             except ValueError:
                 print('Invalid amount. Enter a number')
@@ -174,7 +217,7 @@ class Bank:
         else:
          print('Invalid choise')  
     
-    def handel_transfer(self):
+    def handle_transfer(self):
         print('1) Transfer between your accounts')
         print('2) Transfer to another customer accounts')
         choice = input("Choose a transfer type: ")
@@ -291,7 +334,7 @@ class Bank:
         elif choice == '2':
             self.handle_withdraw()
         elif choice == '3':
-            self.handel_transfer()
+            self.handle_transfer()
         elif choice == '4':
             self.logout()
         else:
