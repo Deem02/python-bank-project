@@ -30,7 +30,7 @@ class BankAccount():
     def deposit(self, amount):
         if amount > 0:
             self.balance += amount 
-            print(f"Deposited {amount}. New balance: {self.balance}")
+            #print(f"Deposited {amount}. New balance: {self.balance}")
             return True
         else:
             print("Deposit amount must be positive")
@@ -39,7 +39,7 @@ class BankAccount():
     def withdraw(self, amount):
         if 0 < amount <= self.balance:
             self.balance -= amount
-            print(f"Withdrew {amount}. New balance: {self.balance}")
+            # print(f"Withdrew {amount}. New balance: {self.balance}")
             return True
         else:
             print("Insufficient funds or invalid amount")
@@ -142,14 +142,18 @@ class Bank:
                 amount = float(input("Enter the amount:"))
                 if choice == '1':
                     if self.current_customer.checking_account.deposit(amount):
+                        print(f'Deposited {amount} New balance: {self.current_customer.checking_account.balance}')
                         self.save_customers()
                 elif choice == '2':
                     if self.current_customer.savings_account.deposit(amount):
+                        print(f'Deposited {amount} New balance: {self.current_customer.sanings_account.balance}')
                         self.save_customers()             
             except ValueError:
                 print('Invalid amount. Enter a number')
         else:
           print('Invalid choise')
+          
+          
     def handle_withdraw(self):
         print("1) Checking Account")
         print("2) Savings Account")
@@ -159,15 +163,87 @@ class Bank:
                 amount = float(input("Enter the amount:"))
                 if choice == '1':
                     if self.current_customer.checking_account.withdraw(amount):
+                        print(f'Withdrew {amount} New balance: {self.current_customer.checking_account.balance}')
                         self.save_customers()
                 elif choice == '2':
                     if self.current_customer.savings_account.withdraw(amount):
+                        print(f'Withdrew {amount} New balance: {self.current_customer.savings_account.balance}')
                         self.save_customers()            
             except ValueError:
                 print('Invalid amount. Enter a number')
         else:
          print('Invalid choise')  
-                  
+    
+    def handel_transfer(self):
+        print('1) Transfer between your accounts')
+        print('2) Transfer to another customer accounts')
+        choice = input("Choose a transfer type: ")
+        
+        if choice =='1':
+            self.transfer_internal()
+        elif choice == '2':
+            self.transfer_external()
+        else:
+            print('Invalid choice.')
+            
+    def transfer_internal(self):
+        print('1) From Cheking -> Savings')
+        print('2) From Savings -> Cheking')
+        choice = input("Choose a transfer direction: ")
+        
+        if choice == '1':
+            source = self.current_customer.checking_account
+            destination = self.current_customer.savings_account
+        elif choice == '2':
+            source = self.current_customer.savings_account
+            destination = self.current_customer.checking_account 
+        else:
+            print('Invalid choice.')
+            return 
+            
+        try:
+           amount = float(input('Enter amount to transfer:'))
+           if source.withdraw(amount):
+               destination.deposit(amount)
+               self.save_customers()
+               print('Transfer successfuly')
+        except ValueError:
+            print('Invaild amount')     
+            
+    def transfer_external(self):
+        try:
+            recipient_id = int(input('Enter recipient account ID: ')) 
+            recipient = self.customers.get(recipient_id)  
+            if not recipient:
+                print('Recipient account nor found')
+                return
+            if recipient_id == self.current_customer.account_id:
+                print('Cannot transfer to yourself. Use internal transfer option ')
+                return
+            print('Transfer from: ')
+            print('1) My Cheking account')
+            print('2) My Savings account')
+            source_choice = input('Choose your source account: ').strip()
+            source_account = None
+            if source_choice == '1':
+                source_account = self.current_customer.checking_account
+            elif source_choice == '2':
+                source_account = self.current_customer.savings_account
+            else:
+                print('Invaild source account choice')
+                return
+            print(f'Transfer will be deposited to {recipient.first_name} {recipient.last_name} cheking account')
+            dest_account = recipient.checking_account
+            amount = float(input('Enter amount to transfer:'))
+            if source_account.withdraw(amount):
+                dest_account.deposit(amount)
+                self.save_customers()
+                print('Transfer to other customer successfuly')
+        except ValueError:
+            print('Invalid ID or amont') 
+            
+            
+                     
     def handle_add_new_customer(self):
         while True:
             first_name = input("First Name: ").strip()
@@ -212,6 +288,8 @@ class Bank:
             self.handle_deposit()
         elif choice == '2':
             self.handle_withdraw()
+        elif choice == '3':
+            self.handel_transfer()
         elif choice == '4':
             self.logout()
         else:
@@ -219,14 +297,7 @@ class Bank:
             
             
 if __name__ == '__main__' : 
-    # customer1 = Customer('deem','alqasir', '123')
-    # print(customer1)
     
-    # first_name = input("First Name: ")
-    # last_name = input("Last Name: ")
-    # password = input("Password: ")
-    # customer1 = Customer(first_name, last_name, password)
-    # print(customer1)
     bank = Bank()
     while True:
         
