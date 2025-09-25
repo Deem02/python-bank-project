@@ -220,6 +220,7 @@ class Bank:
             if recipient_id == self.current_customer.account_id:
                 print('Cannot transfer to yourself. Use internal transfer option ')
                 return
+            print(f'Transfer will be deposited to {recipient.first_name} {recipient.last_name} cheking account')
             print('Transfer from: ')
             print('1) My Cheking account')
             print('2) My Savings account')
@@ -232,13 +233,14 @@ class Bank:
             else:
                 print('Invaild source account choice')
                 return
-            print(f'Transfer will be deposited to {recipient.first_name} {recipient.last_name} cheking account')
             dest_account = recipient.checking_account
             amount = float(input('Enter amount to transfer:'))
             if source_account.withdraw(amount):
                 dest_account.deposit(amount)
                 self.save_customers()
                 print('Transfer to other customer successfuly')
+            # else:
+            #     print('Transfer failed. Insufficinet funds')
         except ValueError:
             print('Invalid ID or amont') 
             
