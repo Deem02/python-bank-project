@@ -1,4 +1,7 @@
 import unittest
+import tempfile
+import os
+from unittest.mock import patch
 from bank.bank import Customer, BankAccount, CheckingAccount, SavingsAccount, Bank
 
 class TestCustomer(unittest.TestCase):
@@ -78,10 +81,37 @@ class TestChekingAccountOverdraft(unittest.TestCase):
         self.assertEqual(self.cheking.overdraft_count, 2)
         self.assertFalse(self.cheking.is_active)
                  
-# class TestBank(unittest.TestCas):
-#     pass
-
-
+                 
+class TestBank(unittest.TestCase):
+    def setUp(self):
+        self.temp_file =  tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv')
+        self.test_file_path = self.temp_file.name
+        self.temp_file.close()
+        self.bank = Bank(filename=self.test_file_path)
+    def tearDown(self):
+        os.remove(self.test_file_path)
+        
+    def test_add_and_save_customer(self):
+        self.bank.add_customer('mohamed', 'alahmed', 'pass321', checking_balance=2000, savings_balance=200)
+        self.assertIn(1001,self.bank.customers)
+        new_bank_instance = Bank(filename=self.test_file_path)
+        self.assertEqual(len(new_bank_instance.customers), 1)
+        loaded_customer = new_bank_instance.customers.get(1001)
+        self.assertEqual(loaded_customer.first_name, 'mohamed')
+        self.assertEqual(loaded_customer.last_name, 'alahmed')
+        self.assertEqual(loaded_customer.checking_account.balance, 2000)
+        self.assertEqual(loaded_customer.savings_account.balance, 200)
+        
+        
+    @patch('builtins.input', side_effect=[1001,'pass321'])    
+    def test_login(self,mock_input): 
+        self.bank.add_customer('mohamed', 'alahmed', 'pass321') 
+        self.bank.login() 
+        self.assertIsNotNone(self.bank.current_customer)
+        self.assertEqual(self.bank.current_customer.account_id, 1001)
+        self.assertEqual(self.bank.current_customer.first_name, 'mohamed')
+        
+        
 #python -m unittest  tests.test_bank
 # if __name__ == '__main__':
 #     unittest.main()
