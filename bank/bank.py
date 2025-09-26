@@ -26,7 +26,7 @@ class BankAccount():
             #print(f"Deposited {amount}. New balance: {self.balance}")
             return True
         else:
-            print("Deposit amount must be positive")
+            # print("Deposit amount must be positive")
             return False
         
     def withdraw(self, amount):
@@ -35,7 +35,7 @@ class BankAccount():
             # print(f"Withdrew {amount}. New balance: {self.balance}")
             return True
         else:
-            print("Insufficient funds or invalid amount")
+            # print("Insufficient funds or invalid amount")
             return False
     def __str__(self):
         return f"Account ID: {self.customer.account_id} Balance {self.balance}"
