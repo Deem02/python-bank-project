@@ -1,12 +1,12 @@
-Command-Line Banking Application
+# Command-Line Banking Application
 
-Project Overview
+## Project Overview
 
 This project is a comprehensive, command-line interface (CLI) banking application built entirely in Python. Enter only numbers for better User experience. It demonstrates core software engineering principles, including Object-Oriented Programming (OOP), reliable file saving, and a focus on unit testing.
 
 The application simulates a real-world banking system where cashiers can manage customer accounts. All customer and account data is persistently stored and retrieved from .csv file.
 
-Core Features:
+## Core Features:
 
 Customer Account Management Add new customers with checking and savings account.
 
@@ -22,9 +22,9 @@ Unit Test: Implement  unit tests using Python unittest framework to make sure th
 
 
 
-Code Snippet: 
+## Code Snippet: 
 transfer_external method:
-
+```
 def transfer_external(self):
         try:
             recipient_id = int(input('Enter recipient account ID: ')) 
@@ -59,9 +59,10 @@ def transfer_external(self):
                 
         except ValueError:
             print('Invalid ID or amont')
+```
   
 
-What I Learned from This Project:
+## What I Learned from This Project:
 
 Unit Testing: I learned the importance of unit testing to ensure the quality of the code and avoid bugs in the future. 
 After implementing the core features, I wrote specific tests with the Python unittest framework to each functionality (e.g. testoverdraftdenied, test_login).
@@ -73,8 +74,9 @@ Strong Error Handling: I re-engineered the whole application from a return True/
 Reliable CSV File Handling: I learned to write code that is robust to handle an application data using Python csv module. My implementation is backward-compatible, its a safe way of handling files with missing columns by using default values to avoid crashes
 
 
- What am plaining to do for Future Enhancements:
+## What am plaining to do for Future Enhancements:
 
 Display Transaction Data: Implement a system that records all transactions in to a separate transactions.csv file so that the customer can see all account activity.
 
 Password Strength Checker: enforce stronger password requirements when creating a customer to increase account security.
+
