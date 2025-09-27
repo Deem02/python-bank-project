@@ -8,17 +8,17 @@ The application simulates a real-world banking system where cashiers can manage 
 
 ## Core Features:
 
-Customer Account Management Add new customers with checking and savings account.
+- Customer Account Management Add new customers with checking and savings account.
 
-Secure Authentication: A customer login system to access their accounts.
+- Secure Authentication: A customer login system to access their accounts.
 
-Standard Banking Operations: Deposit, withdrawal and transfer (internal, between a customer own accounts and external, to other customer account).
+- Standard Banking Operations: Deposit, withdrawal and transfer (internal, between a customer own accounts and external, to other customer account).
 
-An Overdraft Protection: A rule-based overdraft system for checking account and account deactivation/reactivation logic.
+- An Overdraft Protection: A rule-based overdraft system for checking account and account deactivation/reactivation logic.
 
-An Exception handling: Implement custom exceptions to handle business logic errors giving the user a clear feedback.
+- An Exception handling: Implement custom exceptions to handle business logic errors giving the user a clear feedback.
 
-Unit Test: Implement  unit tests using Python unittest framework to make sure that everything is reliable and correct.
+- Unit Test: Implement  unit tests using Python unittest framework to make sure that everything is reliable and correct.
 
 
 
@@ -64,19 +64,20 @@ def transfer_external(self):
 
 ## What I Learned from This Project:
 
-Unit Testing: I learned the importance of unit testing to ensure the quality of the code and avoid bugs in the future. 
+- Unit Testing: I learned the importance of unit testing to ensure the quality of the code and avoid bugs in the future. 
 After implementing the core features, I wrote specific tests with the Python unittest framework to each functionality (e.g. testoverdraftdenied, test_login).
 
-Object-Oriented Architecture: It is achieved by creating a clear class structure which is well-defined and separates responsibilities. The Bank class provides the overall control, while the BankAccount, CheckingAccount and SavingsAccount classes implement the details of logic and data of each account type.
+- Object-Oriented Architecture: It is achieved by creating a clear class structure which is well-defined and separates responsibilities. The Bank class provides the overall control, while the BankAccount, CheckingAccount and SavingsAccount classes implement the details of logic and data of each account type.
 
-Strong Error Handling: I re-engineered the whole application from a return True/False system to a custom exception hierarchy. This created a cleaner division between business logic and the user interface that made the code much easier to maintain and debug. 
+- Strong Error Handling: I re-engineered the whole application from a return True/False system to a custom exception hierarchy. This created a cleaner division between business logic and the user interface that made the code much easier to maintain and debug. 
 
-Reliable CSV File Handling: I learned to write code that is robust to handle an application data using Python csv module. My implementation is backward-compatible, its a safe way of handling files with missing columns by using default values to avoid crashes
+- Reliable CSV File Handling: I learned to write code that is robust to handle an application data using Python csv module. My implementation is backward-compatible, its a safe way of handling files with missing columns by using default values to avoid crashes
 
 
 ## What am plaining to do for Future Enhancements:
 
-Display Transaction Data: Implement a system that records all transactions in to a separate transactions.csv file so that the customer can see all account activity.
+- Display Transaction Data: Implement a system that records all transactions in to a separate transactions.csv file so that the customer can see all account activity.
 
-Password Strength Checker: enforce stronger password requirements when creating a customer to increase account security.
+- Password Strength Checker: enforce stronger password requirements when creating a customer to increase account security.
+
 
