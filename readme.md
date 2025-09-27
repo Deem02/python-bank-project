@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project is a comprehensive, command-line interface (CLI) banking application built entirely in Python. Enter only numbers for better User experience. It demonstrates core software engineering principles, including Object-Oriented Programming (OOP), reliable file saving, and a focus on unit testing.
+This project is a comprehensive, command-line interface (CLI) banking application built entirely in Python. Using only numbers for better User experience. It demonstrates core software engineering principles, including Object-Oriented Programming (OOP), reliable file saving, and a focus on unit testing.
 
 The application simulates a real-world banking system where cashiers can manage customer accounts. All customer and account data is persistently stored and retrieved from .csv file.
 
@@ -79,5 +79,6 @@ After implementing the core features, I wrote specific tests with the Python uni
 - Display Transaction Data: Implement a system that records all transactions in to a separate transactions.csv file so that the customer can see all account activity.
 
 - Password Strength Checker: enforce stronger password requirements when creating a customer to increase account security.
+
 
 
