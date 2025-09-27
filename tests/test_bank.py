@@ -12,14 +12,7 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(self.customer.password,'password')
         self.assertEqual(self.customer.account_id, 1001 )
     
-        
-    # def test_add_account(self):
-    #     customer = Customer('Dana', 'alaile', 'password21')
-    #     account = 'Account object'
-    #     customer.add_account(account)
-    #     self.assertIn(account, customer.accounts)
-    #     self.assertEqual(len(customer.accounts), 1)
-       
+
 class TestBankAccountAndSubclass(unittest.TestCase):
     
     def setUp(self): 
@@ -111,7 +104,8 @@ class TestBank(unittest.TestCase):
         self.assertEqual(self.bank.current_customer.account_id, 1001)
         self.assertEqual(self.bank.current_customer.first_name, 'mohamed')
         
-        
+
+#python -m unittest --buffer  tests.test_bank # to hidden the print output      
 #python -m unittest  tests.test_bank
 # if __name__ == '__main__':
 #     unittest.main()

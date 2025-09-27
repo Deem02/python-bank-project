@@ -1,3 +1,18 @@
+class BankError(Exception):
+   pass 
+
+class InvalidAmountError(BankError):
+    pass
+class InsufficientFundsError (BankError):
+    pass
+class AccountDeactiveError(BankError):
+    pass
+class OverdraftLimitError(BankError):
+    pass
+
+class AccountNotFoundError(BankError):
+    pass
+
 #import uuid
 import csv
 class Customer:
@@ -21,22 +36,18 @@ class BankAccount():
         self.balance = float(balance)
         
     def deposit(self, amount):
-        if amount > 0:
-            self.balance += amount 
-            #print(f"Deposited {amount}. New balance: {self.balance}")
-            return True
-        else:
-            # print("Deposit amount must be positive")
-            return False
+        if amount <= 0:
+            raise InvalidAmountError("Deposit amount must be positive")      
+        self.balance += amount 
+       
         
     def withdraw(self, amount):
-        if 0 < amount <= self.balance:
-            self.balance -= amount
-            # print(f"Withdrew {amount}. New balance: {self.balance}")
-            return True
-        else:
-            # print("Insufficient funds or invalid amount")
-            return False
+        if amount <= 0:
+            raise InvalidAmountError("Withdraw amount must be positive")
+        if amount > self.balance:
+            raise InsufficientFundsError(f'Insufficient funds. Current Balance:{self.balance}')
+        self.balance -= amount
+    
     def __str__(self):
         return f"Account ID: {self.customer.account_id} Balance {self.balance}"
        
@@ -55,42 +66,45 @@ class CheckingAccount(BankAccount):
         
     def withdraw(self, amount):
         if not self.is_active:
-            print('Account is deactivated ')
-            return False
+            raise AccountDeactiveError(f'Account is deactivated. Current Balance is {self.balance}. Please deposit at least {-self.balance} to reactivate.')
+            
         if self.balance>=amount:
-            self.balance-=amount
-            return True
+            super().withdraw(amount)
+          
         else: # an overdraft situation
             total_charge = amount +self.OVERDRAFT_FEE
             if (self.balance - total_charge) < self.OVERDRAFT_LIMIT:
-                print(f'Transaction denied. Exceeds overdraft limit of ${self.OVERDRAFT_LIMIT} ')
-                return False
+                raise OverdraftLimitError(f'Transaction denied. Exceeds overdraft limit of ${self.OVERDRAFT_LIMIT} ')
+              
             # overdraft allowed 
             self.balance -= total_charge
             self.overdraft_count += 1
-            print(f'Overdraft fee of ${self.OVERDRAFT_FEE} has been applied')
+            print(f'Overdraft fee of ${self.OVERDRAFT_FEE} has been applied. New Balance: {self.balance}')
             
             if self.overdraft_count >= self.MAX_OVERDRAFTS:
                 self.is_active = False
-                print('Waring: Account has been deactivated')
-            return True
+                print('Warning: Account has been deactivated due to reaching the maximum number og overdrafts.')
+      
         
     def deposit(self, amount):  
-        deposit_successful = super().deposit(amount)          
+        was_inactive = not self.is_active
+        super().deposit(amount)          
          
-        if deposit_successful:
+        if was_inactive:
             # reactivate if  the customer balance become  >=0 
-            if not self.is_active and self.balance >=0:
+            if self.balance >=0:
               self.is_active = True
               self.overdraft_count = 0
-              print('Account is reactivated.') 
+              print('Account is reactivated!') 
+            
+                
               
     def __str__(self):
-        return f"Checking Account ID: {self.customer.account_id} Balance {self.balance}"
+        return f"Checking Account Balance: {self.balance}"
         
 class SavingsAccount(BankAccount):        
     def __str__(self):
-        return f"Saving Account ID: {self.customer.account_id} Balance {self.balance}"
+        return f"Saving Account Balance: {self.balance}"
   
 class Bank:
     def __init__(self, filename='data/bank.csv'):
@@ -184,17 +198,19 @@ class Bank:
             try:
                 amount = float(input("Enter the amount:"))
                 if choice == '1':
-                    if self.current_customer.checking_account.deposit(amount):
-                        print(f'Deposited {amount} New balance: {self.current_customer.checking_account.balance}')
-                        self.save_customers()
+                    self.current_customer.checking_account.deposit(amount)
+                    print(f'Deposited {amount} New balance: {self.current_customer.checking_account.balance}')
+                    self.save_customers()
                 elif choice == '2':
-                    if self.current_customer.savings_account.deposit(amount):
-                        print(f'Deposited {amount} New balance: {self.current_customer.savings_account.balance}')
-                        self.save_customers()             
+                    self.current_customer.savings_account.deposit(amount)
+                    print(f'Deposited {amount} New balance: {self.current_customer.savings_account.balance}')
+                    self.save_customers()
+            except InvalidAmountError as e:
+                print(f'Deposit failed: {e}')                                
             except ValueError:
                 print('Invalid amount. Enter a number')
         else:
-          print('Invalid choise')
+          print('Invalid choice')
           
           
     def handle_withdraw(self):
@@ -204,18 +220,21 @@ class Bank:
         if choice == '1' or choice == '2' :
             try:
                 amount = float(input("Enter the amount:"))
-                if choice == '1':
-                    if self.current_customer.checking_account.withdraw(amount):
-                        print(f'Withdrew {amount} New balance: {self.current_customer.checking_account.balance}')
-                        self.save_customers()
+                if choice == '1': 
+                    self.current_customer.checking_account.withdraw(amount)
+                    print(f'Withdrew {amount} New balance: {self.current_customer.checking_account.balance}')
+                    self.save_customers()
                 elif choice == '2':
-                    if self.current_customer.savings_account.withdraw(amount):
-                        print(f'Withdrew {amount} New balance: {self.current_customer.savings_account.balance}')
-                        self.save_customers()            
+                    self.current_customer.savings_account.withdraw(amount)
+                    print(f'Withdrew {amount} New balance: {self.current_customer.savings_account.balance}')
+                    self.save_customers() 
+                  
+            except BankError as e:
+                print(f'withdraw failed: {e}')           
             except ValueError:
                 print('Invalid amount. Enter a number')
         else:
-         print('Invalid choise')  
+         print('Invalid choice')  
     
     def handle_transfer(self):
         print('1) Transfer between your accounts')
@@ -245,11 +264,15 @@ class Bank:
             return 
             
         try:
-           amount = float(input('Enter amount to transfer:'))
-           if source.withdraw(amount):
-               destination.deposit(amount)
-               self.save_customers()
-               print('Transfer successfuly')
+            amount = float(input('Enter amount to transfer:'))
+   
+            source.withdraw(amount)
+            destination.deposit(amount)
+            self.save_customers()
+            print('Transfer successfully ✅')
+            
+        except BankError as e:
+               print(f'Transfer failed: {e}') 
         except ValueError:
             print('Invaild amount')     
             
@@ -258,11 +281,11 @@ class Bank:
             recipient_id = int(input('Enter recipient account ID: ')) 
             recipient = self.customers.get(recipient_id)  
             if not recipient:
-                print('Recipient account nor found')
-                return
+                raise AccountNotFoundError('Recipient account nor found')
+                
             if recipient_id == self.current_customer.account_id:
-                print('Cannot transfer to yourself. Use internal transfer option ')
-                return
+                raise BankError('Cannot transfer to yourself. Use internal transfer option ')
+                
             print(f'Transfer will be deposited to {recipient.first_name} {recipient.last_name} cheking account')
             print('Transfer from: ')
             print('1) My Cheking account')
@@ -278,12 +301,13 @@ class Bank:
                 return
             dest_account = recipient.checking_account
             amount = float(input('Enter amount to transfer:'))
-            if source_account.withdraw(amount):
-                dest_account.deposit(amount)
-                self.save_customers()
-                print('Transfer to other customer successfuly')
-            # else:
-            #     print('Transfer failed. Insufficinet funds')
+            source_account.withdraw(amount)
+            dest_account.deposit(amount)
+            self.save_customers()
+            print('Transfer to other customer successfully ✅')
+        except BankError as e:
+            print(f'Transfer failed: {e}')     
+                
         except ValueError:
             print('Invalid ID or amont') 
             
@@ -292,14 +316,21 @@ class Bank:
     def handle_add_new_customer(self):
         while True:
             first_name = input("First Name: ").strip()
-            if first_name:
+            if not first_name:
+                print('First name cannnot be empty. Please try agein ')   
+            elif not first_name.isalpha():
+                print('Error: Please enter only alphabetical characters for your name') 
+            else:
                 break
-            print('First name cannnot be empty. Please try agein ')
+            
         while True:
             last_name = input("Last Name: ").strip()
-            if last_name:
+            if not last_name:
+                print('Last name cannnot be empty. Please try agein ')
+            elif not last_name.isalpha():
+                print('Error: Please enter only alphabetical characters for your name') 
+            else:
                 break
-            print('Last name cannnot be empty. Please try agein ')
         while True:
             password = input("Password: ").strip()
             if password:
@@ -309,7 +340,7 @@ class Bank:
             checking_balance = float(input('Enter initiial cheking balance: ') or '0.0') # if its empty string
             savings_balance = float(input('Enter initiial savings balance: ') or '0.0')
             if checking_balance < 0 or savings_balance < 0:
-               print('Balance cannot be nefative. Setting it to 0.') 
+               print('Balance cannot be negative. Setting it to 0.') 
                checking_balance = max(0, checking_balance)
                savings_balance = max(0, savings_balance)
         except ValueError:

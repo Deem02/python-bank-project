@@ -1,3 +1,7 @@
 account_id,frst_name,last_name,password,balance_checking,balance_savings,checking_overdrafts,checking_is_active
 1001,helah,mohamed,pass321,4015.0,400.0,0,True
 1002,deem,alqasir,pass321,-90.0,540.0,2,False
+1003,lama,ahmed,pass123,1490.0,510.0,0,True
+1004,1,1,1,-85.0,0.0,1,True
+1005,sara,ali,ppp111,1000.0,20.0,0,True
+1006,deem,alqasir,pass321,2000.0,0.0,0,True
