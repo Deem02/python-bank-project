@@ -8,7 +8,7 @@ The application simulates a real-world banking system where cashiers can manage 
 
 ## Core Features:
 
-- Customer Account Management Add new customers with checking and savings account.
+- Customer Account Management: Add new customers with checking and savings account.
 
 - Secure Authentication: A customer login system to access their accounts.
 
@@ -79,6 +79,7 @@ After implementing the core features, I wrote specific tests with the Python uni
 - Display Transaction Data: Implement a system that records all transactions in to a separate transactions.csv file so that the customer can see all account activity.
 
 - Password Strength Checker: enforce stronger password requirements when creating a customer to increase account security.
+
 
 
 
