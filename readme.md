@@ -58,7 +58,7 @@ def transfer_external(self):
             print(f'Transfer failed: {e}')     
                 
         except ValueError:
-            print('Invalid ID or amont')
+            print('Invalid amont')
 ```
   
 
@@ -79,6 +79,7 @@ After implementing the core features, I wrote specific tests with the Python uni
 - Display Transaction Data: Implement a system that records all transactions in to a separate transactions.csv file so that the customer can see all account activity.
 
 - Password Strength Checker: enforce stronger password requirements when creating a customer to increase account security.
+
 
 
 
